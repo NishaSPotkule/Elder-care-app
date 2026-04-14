@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#F2F4F7">
+
+    <!-- Logo -->
+    <ImageView
+        android:id="@+id/imgLogo"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:src="@drawable/applogo"
+        android:background="@drawable/bg_circle"
+        android:padding="20dp"/>
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/txtTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Elder Care"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#1C1C1C"
+        android:layout_marginTop="20dp"/>
+
+    <!-- Subtitle -->
+    <TextView
+        android:id="@+id/txtSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Your empathetic guardian for a healthier, safer life."
+        android:textSize="14sp"
+        android:textColor="#7A7A7A"
+        android:textAlignment="center"
+        android:paddingHorizontal="40dp"
+        android:layout_marginTop="10dp"/>
+
+
+    </LinearLayout>
+

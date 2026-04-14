@@ -1,0 +1,56 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_margin="12dp"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/bg_card"
+    android:elevation="6dp">
+
+
+    <TextView
+        android:id="@+id/tvName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Medicine Name"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#222"/>
+
+
+    <TextView
+        android:id="@+id/tvInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Take after food • 2 times a day"
+        android:textSize="14sp"
+        android:textColor="#777"
+        android:layout_marginTop="4dp"/>
+
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0"
+        android:layout_marginVertical="10dp"/>
+
+
+    <Button
+        android:id="@+id/btnTake"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+
+        android:text="✔ Mark as Taken"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+
+        android:textColor="#FFFFFF"
+
+        android:background="@drawable/bg_button"
+
+        android:backgroundTint="@null"
+        app:backgroundTint="@null"
+
+        android:layout_marginTop="6dp"/>
+</LinearLayout>
