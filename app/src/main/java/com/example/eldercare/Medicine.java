@@ -10,12 +10,11 @@ public class Medicine {
     public int id;
 
     public String name;
-    public int hour;
-    public int minute;
-    public boolean isAM;
-    public String type;
-    public String times;
-    public int sortTime;
+    public String type;      // Daily / Weekly
+    public String times;     // Morning-08:00 AM,Afternoon-02:00 PM
+
+    public int sortTime;     // used for sorting
 
     public boolean taken;
+    public long alarmTime;   // for missed detection
 }

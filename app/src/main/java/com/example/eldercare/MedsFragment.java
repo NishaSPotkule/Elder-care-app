@@ -45,6 +45,7 @@ public class MedsFragment extends Fragment {
         return view;
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
@@ -54,6 +55,13 @@ public class MedsFragment extends Fragment {
         List<Medicine> medicines = db.medicineDao().getAll();
 
         if (medicines != null) {
+
+
+            for (Medicine m : medicines) {
+                m.taken = false;
+                db.medicineDao().update(m);
+            }
+
             list.addAll(medicines);
         }
 
