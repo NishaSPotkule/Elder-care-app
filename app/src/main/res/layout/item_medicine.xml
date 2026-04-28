@@ -1,56 +1,89 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_margin="12dp"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@drawable/bg_card"
-    android:elevation="6dp">
 
+    app:cardCornerRadius="18dp"
+    app:cardElevation="8dp"
+    app:cardBackgroundColor="#FFFFFF">
 
-    <TextView
-        android:id="@+id/tvName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Medicine Name"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="#222"/>
-
-
-    <TextView
-        android:id="@+id/tvInfo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Take after food • 2 times a day"
-        android:textSize="14sp"
-        android:textColor="#777"
-        android:layout_marginTop="4dp"/>
-
-
-    <View
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#E0E0E0"
-        android:layout_marginVertical="10dp"/>
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
 
-    <Button
-        android:id="@+id/btnTake"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        android:text="✔ Mark as Taken"
-        android:textAllCaps="false"
-        android:textStyle="bold"
 
-        android:textColor="#FFFFFF"
+            <TextView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_circle_icon"
+                android:gravity="center"
+                android:text="💊"
+                android:textSize="20sp"/>
 
-        android:background="@drawable/bg_button"
 
-        android:backgroundTint="@null"
-        app:backgroundTint="@null"
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="10dp">
 
-        android:layout_marginTop="6dp"/>
-</LinearLayout>
+                <TextView
+                    android:id="@+id/tvName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Paracetamol"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#222"/>
+
+                <TextView
+                    android:id="@+id/tvInfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Morning • Night"
+                    android:textSize="13sp"
+                    android:textColor="#777"
+                    android:layout_marginTop="2dp"/>
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EEEEEE"
+            android:layout_marginVertical="12dp"/>
+
+
+
+        <Button
+            android:id="@+id/btnTake"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="✔ Mark as Taken"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/bg_button"
+            android:backgroundTint="@null"
+            app:backgroundTint="@null"
+            android:layout_marginTop="6dp"/>
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

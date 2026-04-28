@@ -45,10 +45,12 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.ViewHo
         Medicine m = list.get(position);
 
         holder.name.setText(m.name);
-
         holder.info.setText(formatTimes(m.times, m.type));
 
         boolean isDue = isMedicineDue(m.times);
+
+
+        holder.takeBtn.setOnClickListener(null);
 
         if (m.taken) {
             holder.takeBtn.setText("Taken ✅");
@@ -59,8 +61,12 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.ViewHo
             holder.takeBtn.setEnabled(true);
 
             holder.takeBtn.setOnClickListener(v -> {
+
                 m.taken = true;
                 db.medicineDao().update(m);
+
+                Toast.makeText(context, "Medicine Taken ✅", Toast.LENGTH_SHORT).show();
+
                 notifyItemChanged(position);
             });
 

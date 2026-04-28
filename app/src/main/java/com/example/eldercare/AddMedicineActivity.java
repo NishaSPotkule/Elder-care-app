@@ -3,7 +3,6 @@ package com.example.eldercare;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
-import com.example.eldercare.AlarmHelper;
 import android.widget.*;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,7 +23,6 @@ public class AddMedicineActivity extends AppCompatActivity {
     AppDatabase db;
 
     ArrayList<String> selectedTimes = new ArrayList<>();
-
 
     int mHour = -1, mMinute = -1;
     int aHour = -1, aMinute = -1;
@@ -50,7 +48,6 @@ public class AddMedicineActivity extends AppCompatActivity {
         tvNightTime = findViewById(R.id.tvNightTime);
 
         db = AppDatabase.getInstance(this);
-
 
         tvMorningTime.setOnClickListener(v -> {
             if (!checkMorning.isChecked()) {
@@ -129,10 +126,6 @@ public class AddMedicineActivity extends AppCompatActivity {
             return;
         }
 
-        if (!dailyRadio.isChecked() && !weeklyRadio.isChecked()) {
-            Toast.makeText(this, "Select Daily or Weekly", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
         if (!checkMorning.isChecked() && !checkAfternoon.isChecked() && !checkNight.isChecked()) {
             Toast.makeText(this, "Select at least one time", Toast.LENGTH_SHORT).show();
@@ -141,12 +134,22 @@ public class AddMedicineActivity extends AppCompatActivity {
 
         selectedTimes.clear();
 
+        int earliestTime = Integer.MAX_VALUE;
+
         if (checkMorning.isChecked()) {
             if (mHour == -1) {
                 Toast.makeText(this, "Select Morning time", Toast.LENGTH_SHORT).show();
                 return;
             }
-            selectedTimes.add("Morning-" + tvMorningTime.getText().toString());
+
+            String time = tvMorningTime.getText().toString();
+            selectedTimes.add("Morning-" + time);
+
+            int totalMin = mHour * 60 + mMinute;
+            earliestTime = Math.min(earliestTime, totalMin);
+
+
+            AlarmHelper.setDailyAlarm(this, name + "_MORNING", mHour, mMinute);
         }
 
         if (checkAfternoon.isChecked()) {
@@ -154,7 +157,14 @@ public class AddMedicineActivity extends AppCompatActivity {
                 Toast.makeText(this, "Select Afternoon time", Toast.LENGTH_SHORT).show();
                 return;
             }
-            selectedTimes.add("Afternoon-" + tvAfternoonTime.getText().toString());
+
+            String time = tvAfternoonTime.getText().toString();
+            selectedTimes.add("Afternoon-" + time);
+
+            int totalMin = aHour * 60 + aMinute;
+            earliestTime = Math.min(earliestTime, totalMin);
+
+            AlarmHelper.setDailyAlarm(this, name + "_AFTERNOON", aHour, aMinute);
         }
 
         if (checkNight.isChecked()) {
@@ -162,47 +172,27 @@ public class AddMedicineActivity extends AppCompatActivity {
                 Toast.makeText(this, "Select Night time", Toast.LENGTH_SHORT).show();
                 return;
             }
-            selectedTimes.add("Night-" + tvNightTime.getText().toString());
+
+            String time = tvNightTime.getText().toString();
+            selectedTimes.add("Night-" + time);
+
+            int totalMin = nHour * 60 + nMinute;
+            earliestTime = Math.min(earliestTime, totalMin);
+
+            AlarmHelper.setDailyAlarm(this, name + "_NIGHT", nHour, nMinute);
         }
 
 
-        for (String t : selectedTimes) {
+        Medicine med = new Medicine();
+        med.name = name;
+        med.type = dailyRadio.isChecked() ? "Daily" : "Weekly";
+        med.times = TextUtils.join(",", selectedTimes);
+        med.sortTime = earliestTime;
+        med.taken = false;
 
-            Medicine med = new Medicine();
-            med.name = name;
-            med.type = dailyRadio.isChecked() ? "Daily" : "Weekly";
-            med.times = t;
-
-            db.medicineDao().insert(med);
-
-
-            String[] parts = t.split("-");
-            String label = parts[0];
-            String time = parts[1];
-
-            int hour = convertTo24Hour(time);
-            int minute = convertToMinute(time);
-
-            AlarmHelper.setDailyAlarm(this, name + " (" + label + ")", hour, minute);
-        }
+        db.medicineDao().insert(med);
 
         Toast.makeText(this, "Medicine Saved ✅", Toast.LENGTH_SHORT).show();
         finish();
-    }
-    private int convertTo24Hour(String time) {
-        String[] parts = time.split(" ");
-        String[] hm = parts[0].split(":");
-
-        int hour = Integer.parseInt(hm[0]);
-        String ampm = parts[1];
-
-        if (ampm.equals("PM") && hour != 12) hour += 12;
-        if (ampm.equals("AM") && hour == 12) hour = 0;
-
-        return hour;
-    }
-
-    private int convertToMinute(String time) {
-        return Integer.parseInt(time.split(":")[1].split(" ")[0]);
     }
 }

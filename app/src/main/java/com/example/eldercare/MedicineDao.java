@@ -3,6 +3,7 @@ package com.example.eldercare;
 import androidx.room.*;
 import java.util.List;
 
+
 @Dao
 public interface MedicineDao {
 
@@ -18,7 +19,6 @@ public interface MedicineDao {
     @Delete
     void delete(Medicine medicine);
 
-    // 🔥 Needed for missed alert
-    @Query("SELECT * FROM medicines WHERE name LIKE :name LIMIT 1")
+    @Query("SELECT * FROM medicines WHERE name = :name LIMIT 1")
     Medicine getByName(String name);
 }
