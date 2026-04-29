@@ -3,6 +3,8 @@ package com.example.eldercare;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.*;
+import android.widget.Button;
+import android.widget.ImageView;
 
 import androidx.annotation.*;
 import androidx.fragment.app.Fragment;
@@ -18,6 +20,7 @@ public class MedsFragment extends Fragment {
     FloatingActionButton fab;
 
     MedicineAdapter adapter;
+    ImageView backBtn;
     ArrayList<Medicine> list = new ArrayList<>();
 
     AppDatabase db;
@@ -30,11 +33,17 @@ public class MedsFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.recyclerMedicine);
         fab = view.findViewById(R.id.fabAddMed);
+        backBtn=view.findViewById(R.id.btnBack);
+        backBtn.setOnClickListener(v ->
+                startActivity(new Intent(getActivity(), HomeFragment.class)));
+
+
 
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         adapter = new MedicineAdapter(requireContext(), list);
         recyclerView.setAdapter(adapter);
+
 
         db = AppDatabase.getInstance(requireContext());
 
