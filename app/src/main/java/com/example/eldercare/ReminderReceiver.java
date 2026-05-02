@@ -3,6 +3,7 @@ package com.example.eldercare;
 import android.app.*;
 import android.content.*;
 import android.os.*;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
@@ -10,43 +11,39 @@ public class ReminderReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
-        String medName = intent.getStringExtra("name");
+        Toast.makeText(context, "ALARM TRIGGERED ", Toast.LENGTH_LONG).show();
+        int id = intent.getIntExtra("id", -1);
         int hour = intent.getIntExtra("hour", 8);
         int minute = intent.getIntExtra("minute", 0);
 
         AppDatabase db = AppDatabase.getInstance(context);
-        Medicine med = db.medicineDao().getByName(medName);
+        Medicine med = db.medicineDao().getById(id);
 
         if (med != null) {
             med.taken = false;
             med.alarmTime = System.currentTimeMillis();
             db.medicineDao().update(med);
+
+            showNotification(context, med.name);
+            startMissedCheck(context, id);
         }
 
-        showNotification(context, medName);
-
-        startMissedCheck(context, medName);
-
-
-        AlarmHelper.setDailyAlarm(context, medName, hour, minute);
+        AlarmHelper.setDailyAlarm(context, id, hour, minute);
     }
 
-
-    private void startMissedCheck(Context context, String name) {
+    private void startMissedCheck(Context context, int id) {
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
 
             AppDatabase db = AppDatabase.getInstance(context);
-            Medicine med = db.medicineDao().getByName(name);
+            Medicine med = db.medicineDao().getById(id);
 
             if (med != null && !med.taken) {
-                showMissedNotification(context, name);
+                showMissedNotification(context, med.name);
             }
 
         }, 15 * 60 * 1000);
     }
-
 
     private void showNotification(Context context, String name) {
 
@@ -63,10 +60,7 @@ public class ReminderReceiver extends BroadcastReceiver {
                     NotificationManager.IMPORTANCE_HIGH
             );
 
-
             channel.enableVibration(true);
-            channel.setVibrationPattern(new long[]{0, 500, 500, 500});
-
             manager.createNotificationChannel(channel);
         }
 
@@ -74,17 +68,12 @@ public class ReminderReceiver extends BroadcastReceiver {
                 .setContentTitle("💊 Time to take medicine")
                 .setContentText(name)
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
-
-
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
-
-
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true);
 
         manager.notify((int) System.currentTimeMillis(), builder.build());
     }
-
 
     private void showMissedNotification(Context context, String name) {
 
@@ -96,8 +85,6 @@ public class ReminderReceiver extends BroadcastReceiver {
                         .setContentTitle("⚠ Missed Medicine!")
                         .setContentText("You missed: " + name)
                         .setSmallIcon(android.R.drawable.ic_dialog_alert)
-
-
                         .setDefaults(NotificationCompat.DEFAULT_ALL)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setAutoCancel(true);

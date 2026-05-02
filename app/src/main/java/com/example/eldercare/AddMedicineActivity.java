@@ -1,7 +1,12 @@
 package com.example.eldercare;
 
+import android.app.AlarmManager;
 import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.widget.*;
 
@@ -14,7 +19,7 @@ import java.util.ArrayList;
 public class AddMedicineActivity extends AppCompatActivity {
 
     EditText nameInput;
-    RadioButton dailyRadio, weeklyRadio;
+    RadioButton dailyRadio;
     MaterialButton saveBtn;
 
     CheckBox checkMorning, checkAfternoon, checkNight;
@@ -24,9 +29,7 @@ public class AddMedicineActivity extends AppCompatActivity {
 
     ArrayList<String> selectedTimes = new ArrayList<>();
 
-    int mHour = -1, mMinute = -1;
-    int aHour = -1, aMinute = -1;
-    int nHour = -1, nMinute = -1;
+    int mHour=-1,mMinute=-1,aHour=-1,aMinute=-1,nHour=-1,nMinute=-1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +40,6 @@ public class AddMedicineActivity extends AppCompatActivity {
         saveBtn = findViewById(R.id.saveBtn);
 
         dailyRadio = findViewById(R.id.radioDaily);
-        weeklyRadio = findViewById(R.id.radioWeekly);
 
         checkMorning = findViewById(R.id.checkMorning);
         checkAfternoon = findViewById(R.id.checkAfternoon);
@@ -49,31 +51,41 @@ public class AddMedicineActivity extends AppCompatActivity {
 
         db = AppDatabase.getInstance(this);
 
-        tvMorningTime.setOnClickListener(v -> {
-            if (!checkMorning.isChecked()) {
-                Toast.makeText(this, "Select Morning first", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            openTimePicker("MORNING");
-        });
+        requestNotificationPermission();
 
-        tvAfternoonTime.setOnClickListener(v -> {
-            if (!checkAfternoon.isChecked()) {
-                Toast.makeText(this, "Select Afternoon first", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            openTimePicker("AFTERNOON");
-        });
-
-        tvNightTime.setOnClickListener(v -> {
-            if (!checkNight.isChecked()) {
-                Toast.makeText(this, "Select Night first", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            openTimePicker("NIGHT");
-        });
+        tvMorningTime.setOnClickListener(v -> openTimePicker("MORNING"));
+        tvAfternoonTime.setOnClickListener(v -> openTimePicker("AFTERNOON"));
+        tvNightTime.setOnClickListener(v -> openTimePicker("NIGHT"));
 
         saveBtn.setOnClickListener(v -> saveMedicine());
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(new String[]{
+                    android.Manifest.permission.POST_NOTIFICATIONS
+            }, 101);
+        }
+    }
+
+    private boolean checkExactAlarmPermission() {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+
+            AlarmManager alarmManager =
+                    (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+            if (!alarmManager.canScheduleExactAlarms()) {
+
+                Toast.makeText(this, "Please allow exact alarm permission", Toast.LENGTH_LONG).show();
+
+                Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                startActivity(intent);
+
+                return false;
+            }
+        }
+        return true;
     }
 
     private void openTimePicker(String type) {
@@ -82,36 +94,27 @@ public class AddMedicineActivity extends AppCompatActivity {
                 this,
                 (view, hourOfDay, minute) -> {
 
+                    String ampm = (hourOfDay >= 12) ? "PM" : "AM";
                     int displayHour = hourOfDay % 12;
                     if (displayHour == 0) displayHour = 12;
 
-                    String ampm = (hourOfDay >= 12) ? "PM" : "AM";
-
                     String time = String.format("%02d:%02d %s", displayHour, minute, ampm);
 
-                    switch (type) {
-                        case "MORNING":
-                            tvMorningTime.setText(time);
-                            mHour = hourOfDay;
-                            mMinute = minute;
-                            break;
-
-                        case "AFTERNOON":
-                            tvAfternoonTime.setText(time);
-                            aHour = hourOfDay;
-                            aMinute = minute;
-                            break;
-
-                        case "NIGHT":
-                            tvNightTime.setText(time);
-                            nHour = hourOfDay;
-                            nMinute = minute;
-                            break;
+                    if (type.equals("MORNING")) {
+                        tvMorningTime.setText(time);
+                        mHour = hourOfDay;
+                        mMinute = minute;
+                    } else if (type.equals("AFTERNOON")) {
+                        tvAfternoonTime.setText(time);
+                        aHour = hourOfDay;
+                        aMinute = minute;
+                    } else {
+                        tvNightTime.setText(time);
+                        nHour = hourOfDay;
+                        nMinute = minute;
                     }
                 },
-                8,
-                0,
-                false
+                8, 0, false
         );
 
         dialog.show();
@@ -119,10 +122,15 @@ public class AddMedicineActivity extends AppCompatActivity {
 
     private void saveMedicine() {
 
+
+        if (!checkExactAlarmPermission()) {
+            return;
+        }
+
         String name = nameInput.getText().toString().trim();
 
         if (name.isEmpty()) {
-            Toast.makeText(this, "Enter medicine name", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Enter name", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -134,22 +142,12 @@ public class AddMedicineActivity extends AppCompatActivity {
 
         selectedTimes.clear();
 
-        int earliestTime = Integer.MAX_VALUE;
-
         if (checkMorning.isChecked()) {
             if (mHour == -1) {
                 Toast.makeText(this, "Select Morning time", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            String time = tvMorningTime.getText().toString();
-            selectedTimes.add("Morning-" + time);
-
-            int totalMin = mHour * 60 + mMinute;
-            earliestTime = Math.min(earliestTime, totalMin);
-
-
-            AlarmHelper.setDailyAlarm(this, name + "_MORNING", mHour, mMinute);
+            selectedTimes.add("Morning-" + tvMorningTime.getText());
         }
 
         if (checkAfternoon.isChecked()) {
@@ -157,14 +155,7 @@ public class AddMedicineActivity extends AppCompatActivity {
                 Toast.makeText(this, "Select Afternoon time", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            String time = tvAfternoonTime.getText().toString();
-            selectedTimes.add("Afternoon-" + time);
-
-            int totalMin = aHour * 60 + aMinute;
-            earliestTime = Math.min(earliestTime, totalMin);
-
-            AlarmHelper.setDailyAlarm(this, name + "_AFTERNOON", aHour, aMinute);
+            selectedTimes.add("Afternoon-" + tvAfternoonTime.getText());
         }
 
         if (checkNight.isChecked()) {
@@ -172,27 +163,29 @@ public class AddMedicineActivity extends AppCompatActivity {
                 Toast.makeText(this, "Select Night time", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            String time = tvNightTime.getText().toString();
-            selectedTimes.add("Night-" + time);
-
-            int totalMin = nHour * 60 + nMinute;
-            earliestTime = Math.min(earliestTime, totalMin);
-
-            AlarmHelper.setDailyAlarm(this, name + "_NIGHT", nHour, nMinute);
+            selectedTimes.add("Night-" + tvNightTime.getText());
         }
-
 
         Medicine med = new Medicine();
         med.name = name;
-        med.type = dailyRadio.isChecked() ? "Daily" : "Weekly";
+        med.type = "Daily";
         med.times = TextUtils.join(",", selectedTimes);
-        med.sortTime = earliestTime;
         med.taken = false;
 
-        db.medicineDao().insert(med);
+        long id = db.medicineDao().insert(med);
+        med.id = (int) id;
 
-        Toast.makeText(this, "Medicine Saved ✅", Toast.LENGTH_SHORT).show();
+
+        if (checkMorning.isChecked())
+            AlarmHelper.setDailyAlarm(this, med.id, mHour, mMinute);
+
+        if (checkAfternoon.isChecked())
+            AlarmHelper.setDailyAlarm(this, med.id, aHour, aMinute);
+
+        if (checkNight.isChecked())
+            AlarmHelper.setDailyAlarm(this, med.id, nHour, nMinute);
+
+        Toast.makeText(this, "Saved ", Toast.LENGTH_SHORT).show();
         finish();
     }
 }
